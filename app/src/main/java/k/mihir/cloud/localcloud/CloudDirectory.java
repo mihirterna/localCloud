@@ -14,8 +14,9 @@ public class CloudDirectory extends AsyncTask<Void,Void,String> {
     private String TAG = "LocalCloud";
     private List<String> dirList;
     private ArrayAdapter<String> dirAdapter;
-    private int port = 8080,count;
-    private String host = "192.168.31.246";
+    private int port = 8080;
+    private String count;
+    private String host = "192.168.31.246",word="file";
     private String inToString = null;
     private Socket socket;
     private InetAddress ad;
@@ -29,21 +30,26 @@ public class CloudDirectory extends AsyncTask<Void,Void,String> {
 
     @Override
     protected void onPostExecute(String strings) {
+        if (getCount().equalsIgnoreCase(word)) {
+        FileDownload fileDownload = new FileDownload(socket);
+        fileDownload.execute();
+        } else {
         dirList.clear();
         dirAdapter.notifyDataSetChanged();
-            for(int i = 0 ;i < getCount();i++ ){
-                DirClass dirClass = new DirClass(socket,dirList,dirAdapter);
-                dirClass.execute();
-            }
+        for (int i = 1; i <= Integer.parseInt(getCount()); i++) {
+            DirClass dirClass = new DirClass(socket, dirList, dirAdapter);
+            dirClass.execute();
+        }
+    }
 
         super.onPostExecute(strings);
     }
 
-    public int getCount() {
+    public String getCount() {
         return count;
     }
 
-    public void setCount(int count) {
+    public void setCount(String count) {
         this.count = count;
     }
 
@@ -54,12 +60,11 @@ public class CloudDirectory extends AsyncTask<Void,Void,String> {
                 ad = InetAddress.getByName(host);
                 socket = new Socket(ad, port);
                 DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-                if(child==null){ dataOutputStream.writeUTF("Client Is Requesting");}
+                if(child==null){ dataOutputStream.writeUTF("init");}
                 else{ dataOutputStream.writeUTF(child);}
                 in = new DataInputStream(socket.getInputStream());
                 inToString = in.readUTF();
-                count = Integer.parseInt(inToString);
-                setCount(count);
+                setCount(inToString);
                 return inToString;
 
         }
