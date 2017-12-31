@@ -30,36 +30,41 @@ public class CloudDirectory extends AsyncTask<Void,Void,String> {
 
     @Override
     protected void onPostExecute(String strings) {
+        try {
         if (getCount().equalsIgnoreCase(word)) {
-        FileDownload fileDownload = new FileDownload(socket);
-        fileDownload.execute();
+            FileDownload fileDownload = new FileDownload(socket);
+            fileDownload.execute();
         } else {
-        dirList.clear();
-        dirAdapter.notifyDataSetChanged();
-        for (int i = 1; i <= Integer.parseInt(getCount()); i++) {
-            DirClass dirClass = new DirClass(socket, dirList, dirAdapter);
-            dirClass.execute();
+            dirList.clear();
+            dirAdapter.notifyDataSetChanged();
+            for (int i = 1; i <= Integer.parseInt(getCount()); i++) {
+                DirClass dirClass = new DirClass(socket, dirList, dirAdapter);
+                dirClass.execute();
+            }
         }
     }
-
+    catch (NullPointerException ne ){
+            Log.e(TAG,Log.getStackTraceString(ne));
+        }
         super.onPostExecute(strings);
     }
 
-    public String getCount() {
+    private String getCount() {
         return count;
     }
 
-    public void setCount(String count) {
+    private void setCount(String count) {
         this.count = count;
     }
 
     @Override
     protected String doInBackground(Void... voids) {
         DataInputStream in ;
+        DataOutputStream dataOutputStream ;
         try {
                 ad = InetAddress.getByName(host);
                 socket = new Socket(ad, port);
-                DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+                dataOutputStream = new DataOutputStream(socket.getOutputStream());
                 if(child==null){ dataOutputStream.writeUTF("init");}
                 else{ dataOutputStream.writeUTF(child);}
                 in = new DataInputStream(socket.getInputStream());
